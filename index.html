@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+    <style>
+      body {
+        background: #6f73a8;
+        margin: 0;
+        padding-block: 10rem;
+        display: grid;
+        place-items: center;
+      }
+
+      form {
+        display: grid;
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+        font-size: 1.5rem;
+      }
+      .hidden {
+        display: none;
+      }
+      .reveal {
+        display: grid;
+      }
+      form > div {
+        display: grid;
+        gap: 0.5rem;
+      }
+      form input {
+        font-size: 1.5rem;
+        border-radius: 0.5rem;
+        border: none;
+      }
+      form button {
+        width: 50%;
+        height: 3rem;
+        font-size: 1.2rem;
+        background: #861830;
+        color: #fff;
+        border: none;
+        border-radius: 0.8rem;
+      }
+      .new-book-button {
+        width: 20%;
+        height: 3rem;
+        font-size: 1.5rem;
+        background: #110b47;
+        color: #fff;
+        border: none;
+        border-radius: 0.8rem;
+      }
+      #library {
+        margin-top: 5rem;
+        display: flex;
+        gap: 2rem;
+        flex-wrap: wrap;
+        justify-self: center;
+        justify-content: center;
+      }
+      .book {
+        display: grid;
+        background: #d64747;
+        border-radius: 1rem;
+        padding: 1rem;
+        gap: 1rem;
+      }
+      .book > h3 {
+        font-size: 1.5rem;
+        margin: 0;
+      }
+      .book p {
+        margin: 0;
+      }
+
+      .book button {
+        border: none;
+        border-radius: 10px;
+        transition: 0.2s;
+      }
+
+      .book button:hover {
+        opacity: 80%;
+      }
+      .delete-book {
+        background: #794b4b;
+        font-size: 1.5rem;
+      }
+
+      .read-status {
+        transform: translateY(-8px);
+        background: #268185;
+        font-size: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <form class="hidden" id="book-description" action="">
+      <div>
+        <label for="author">Author of the Book:</label>
+        <input class="BookInfo" id="author" type="text" />
+      </div>
+      <div>
+        <label for="title">Title of the Book:</label>
+        <input class="BookInfo" id="title" type="text" />
+      </div>
+      <div>
+        <label for="numberOfPages">How many pages does the book have:</label>
+        <input class="BookInfo" id="numberOfPages" type="text" />
+      </div>
+      <div>
+        <label for="hasBeenRead">Have you read the book (Yes/No):</label>
+        <input class="BookInfo" id="hasBeenRead" type="text" />
+      </div>
+      <button id="createBook">Create new Book</button>
+    </form>
+    <button class="new-book-button" id="newBook">New Book</button>
+    <div id="library"></div>
+
+    <script>
+      const BookInfos = document.querySelectorAll(".BookInfo");
+      const newBookButton = document.querySelector("#newBook");
+      const hidden = document.querySelector(".hidden");
+      const form = document.querySelector("form");
+      const createBookButton = document.querySelector("#createBook");
+      const library = document.querySelector("#library");
+      const readStatusButton = document.querySelector(".readStatus");
+      let deleteBookButtons = document.querySelectorAll(".delete-book");
+      form.addEventListener("submit", (e) => {
+        e.preventDefault();
+      });
+
+      let myLibrary = [];
+
+      function Book(author, title, numberOfPages, hasBeenRead) {
+        this.author = author;
+        this.title = title;
+        this.numberOfPages = numberOfPages;
+        this.hasBeenRead = hasBeenRead;
+      }
+
+      function addBookToLibrary() {
+        library.innerHTML = "";
+        let Infos = new Book(
+          BookInfos[0].value,
+          BookInfos[1].value,
+          BookInfos[2].value,
+          BookInfos[3].value
+        );
+        //Test if all inputs are filled clear all input fields and put the book in library
+        let book;
+        test = 0;
+        BookInfos.forEach((Infos) => (Infos.value == "" ? test++ : test));
+        if (
+          test == 0 &&
+          (/no/gi.test(Infos.hasBeenRead) || /yes/gi.test(Infos.hasBeenRead))
+        ) {
+          BookInfos.forEach((Infos) => (Infos.value = ""));
+          book = document.createElement("div");
+          book.classList.add("book");
+          book.innerHTML = `<h3>${Infos.title}</h3>
+          <div><p>Author:</p><p>${Infos.author}</p></div>
+          <div><p>Number of pages:</p><p>${Infos.numberOfPages}</p></div>
+          <p>Book has been Read:</p><button class="read-status">${Infos.hasBeenRead}</button>
+          <button class="delete-book">Delete</button>
+          `;
+          myLibrary.push(book);
+        } else
+          alert("You have to fill all given fields with the correct values");
+
+        for (let i = 0; i < myLibrary.length; i++) {
+          library.appendChild(myLibrary[i]);
+        }
+        deleteBookButtons = document.querySelectorAll(".delete-book");
+      }
+
+      function removeBookFromLibrary(a) {
+        if (a.target.classList.contains("delete-book")) {
+          library.removeChild(a.target.parentNode);
+          myLibrary = myLibrary.filter((book) => {
+            return book !== a.target.parentNode;
+          });
+        }
+      }
+
+      function changeReadStatus(a) {
+        if (a.target.classList.contains("read-status")) {
+          if (/yes/gi.test(a.target.innerText)) {
+            a.target.parentNode.hasBeenRead = "No";
+          } else {
+            a.target.parentNode.hasBeenRead = "Yes";
+          }
+          a.target.innerText = a.target.parentNode.hasBeenRead;
+        }
+      }
+
+      library.addEventListener("click", (a) => {
+        removeBookFromLibrary(a);
+      });
+      library.addEventListener("click", (a) => {
+        changeReadStatus(a);
+      });
+
+      newBookButton.addEventListener("click", () => {
+        hidden.classList.toggle("reveal");
+      });
+
+      createBookButton.addEventListener("click", addBookToLibrary);
+    </script>
+  </body>
+</html>
